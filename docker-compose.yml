@@ -10,18 +10,14 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=secret
     volumes:
-      - mysql-data:/var/lib/mysql
+      - mysql-persistent:/var/lib/mysql
   php:
     restart: unless-stopped
-    container_name: teamsbackup_php
+    container_name: php_container
     build:
       context: ./docker/php
-#      dockerfile: ./docker/dockerfiles/PHP/Dockerfile
     working_dir: ${WEB_ROOT}
     volumes:
-      - /etc/group:/etc/group:ro
-      - /etc/passwd:/etc/passwd:ro
-      - /etc/shadow:/etc/shadow:ro
       - .:${WEB_ROOT}
       - terminal-history:/root/
       - ./docker/php/www.conf:/usr/local/etc/php-fpm.d/www.conf
@@ -45,18 +41,15 @@ services:
     restart: unless-stopped
     image: redis:alpine
     volumes:
-      - redis-data:/data
+      - redis-persistent:/data
 
   worker:
     restart: unless-stopped
-    container_name: teamsbackup_worker
     build:
       context: ./docker/php
-    #      dockerfile: ./docker/dockerfiles/PHP/Dockerfile
     working_dir: ${WEB_ROOT}
     volumes:
       - .:${WEB_ROOT}
-      - terminal-history:/root/
       - ./docker/php/www.conf:/usr/local/etc/php-fpm.d/www.conf
     environment:
       - WEB_ROOT=${WEB_ROOT}
@@ -65,5 +58,5 @@ services:
 
 volumes:
   terminal-history:
-  redis-data:
-  mysql-data:
+  redis-persistent:
+  mysql-persistent:
