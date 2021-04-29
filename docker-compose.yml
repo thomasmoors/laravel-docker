@@ -42,9 +42,9 @@ services:
     image: redis:alpine
     volumes:
       - redis-persistent:/data
-
   worker:
     restart: unless-stopped
+    container_name: worker_container
     build:
       context: ./docker/php
     working_dir: ${WEB_ROOT}
@@ -54,9 +54,22 @@ services:
     environment:
       - WEB_ROOT=${WEB_ROOT}
     command: php artisan horizon
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+      - .:${WEB_ROOT}
+    depends_on:
+      - webserver
+    command: certonly --webroot --webroot-path=${WEB_ROOT}/public --email info@company.xyz --agree-tos --no-eff-email --staging -d 74e081735dca.eu.ngrok.io
+
 
 
 volumes:
   terminal-history:
   redis-persistent:
   mysql-persistent:
+  certbot-etc:
+  certbot-var:
